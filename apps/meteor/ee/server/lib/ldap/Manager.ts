@@ -1,19 +1,21 @@
-import type ldapjs from 'ldapjs';
+import { Team } from '@rocket.chat/core-services';
 import type { ILDAPEntry, IUser, IRoom, IRole, IImportUser } from '@rocket.chat/core-typings';
 import { Users as UsersRaw, Roles, Subscriptions as SubscriptionsRaw, Rooms } from '@rocket.chat/models';
-import { Team } from '@rocket.chat/core-services';
+import type ldapjs from 'ldapjs';
 
 import type { ImporterAfterImportCallback } from '../../../../app/importer/server/definitions/IConversionCallbacks';
+import { addUserToRoom } from '../../../../app/lib/server/functions/addUserToRoom';
+import { createRoom } from '../../../../app/lib/server/functions/createRoom';
+import { removeUserFromRoom } from '../../../../app/lib/server/functions/removeUserFromRoom';
 import { settings } from '../../../../app/settings/server';
-import { LDAPDataConverter } from '../../../../server/lib/ldap/DataConverter';
-import { LDAPConnection } from '../../../../server/lib/ldap/Connection';
-import { LDAPManager } from '../../../../server/lib/ldap/Manager';
-import { logger, searchLogger, mapLogger } from '../../../../server/lib/ldap/Logger';
-import { addUserToRoom, removeUserFromRoom, createRoom } from '../../../../app/lib/server/functions';
-import { syncUserRoles } from '../syncUserRoles';
+import { getValidRoomName } from '../../../../app/utils/server/lib/getValidRoomName';
 import { ensureArray } from '../../../../lib/utils/arrayUtils';
+import { LDAPConnection } from '../../../../server/lib/ldap/Connection';
+import { LDAPDataConverter } from '../../../../server/lib/ldap/DataConverter';
+import { logger, searchLogger, mapLogger } from '../../../../server/lib/ldap/Logger';
+import { LDAPManager } from '../../../../server/lib/ldap/Manager';
+import { syncUserRoles } from '../syncUserRoles';
 import { copyCustomFieldsLDAP } from './copyCustomFieldsLDAP';
-import { getValidRoomName } from '../../../../app/utils/server';
 
 export class LDAPEEManager extends LDAPManager {
 	public static async sync(): Promise<void> {
@@ -23,9 +25,11 @@ export class LDAPEEManager extends LDAPManager {
 
 		const createNewUsers = settings.get<boolean>('LDAP_Background_Sync_Import_New_Users') ?? true;
 		const updateExistingUsers = settings.get<boolean>('LDAP_Background_Sync_Keep_Existant_Users_Updated') ?? true;
+		const mergeExistingUsers = settings.get<boolean>('LDAP_Background_Sync_Merge_Existent_Users') ?? false;
 
 		const options = this.getConverterOptions();
 		options.skipExistingUsers = !updateExistingUsers;
+		options.skipNewUsers = !createNewUsers;
 
 		const ldap = new LDAPConnection();
 		const converter = new LDAPDataConverter(true, options);
@@ -33,7 +37,7 @@ export class LDAPEEManager extends LDAPManager {
 		try {
 			await ldap.connect();
 
-			if (createNewUsers) {
+			if (createNewUsers || mergeExistingUsers) {
 				await this.importNewUsers(ldap, converter);
 			} else if (updateExistingUsers) {
 				await this.updateExistingUsers(ldap, converter);
@@ -252,7 +256,7 @@ export class LDAPEEManager extends LDAPManager {
 
 		const roomOwner = settings.get<string>('LDAP_Sync_User_Data_Channels_Admin') || '';
 		// #ToDo: Remove typecastings when createRoom is converted to ts.
-		const room = await createRoom('c', channel, roomOwner, [], false, {
+		const room = await createRoom('c', channel, roomOwner, [], false, false, {
 			customFields: { ldap: true },
 		} as any);
 		if (!room?.rid) {

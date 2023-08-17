@@ -1,8 +1,8 @@
-/* eslint-env mocha */
-
+import { faker } from '@faker-js/faker';
 import { expect } from 'chai';
-import faker from '@faker-js/faker';
+import { before, describe, it } from 'mocha';
 
+import { getCredentials } from '../../../data/api-data';
 import {
 	sendMessage,
 	startANewLivechatRoomAndTakeIt,
@@ -11,9 +11,8 @@ import {
 	makeAgentAvailable,
 } from '../../../data/livechat/rooms';
 import { updateSetting } from '../../../data/permissions.helper';
-import { getCredentials } from '../../../data/api-data';
 
-describe('LIVECHAT - messages', function () {
+describe('LIVECHAT - messages', () => {
 	before((done) => getCredentials(done));
 
 	before(async () => {
@@ -33,7 +32,7 @@ describe('LIVECHAT - messages', function () {
 			const agentMsgSentence = faker.lorem.sentence();
 			const agentMsg = await sendAgentMessage(roomId, agentMsgSentence);
 
-			const siteUrl = process.env.SITE_URL || 'http://localhost:3000';
+			const siteUrl = process.env.SITE_URL || process.env.TEST_API_URL || 'http://localhost:3000';
 
 			const msgLink = `${siteUrl}/live/${roomId}?msg=${agentMsg._id}`;
 			const quotedMsgSentence = faker.lorem.sentence();

@@ -1,13 +1,13 @@
-import { Meteor } from 'meteor/meteor';
-import { Match, check } from 'meteor/check';
-import _ from 'underscore';
 import { AppsTokens } from '@rocket.chat/models';
 import { serverFetch as fetch } from '@rocket.chat/server-fetch';
+import { Match, check } from 'meteor/check';
+import { Meteor } from 'meteor/meteor';
+import _ from 'underscore';
 
+import { settings } from '../../settings/server';
 import { initAPN, sendAPN } from './apn';
 import { sendGCM } from './gcm';
 import { logger } from './logger';
-import { settings } from '../../settings/server';
 
 export const _matchToken = Match.OneOf({ apn: String }, { gcm: String });
 
@@ -107,18 +107,16 @@ class PushClass {
 	async sendGatewayPush(gateway, service, token, notification, tries = 0) {
 		notification.uniqueId = this.options.uniqueId;
 
-		const data = {
+		const options = {
+			method: 'POST',
 			body: {
 				token,
 				options: notification,
 			},
+			...(token && this.options.getAuthorization && { headers: { Authorization: await this.options.getAuthorization() } }),
 		};
 
-		if (token && this.options.getAuthorization) {
-			data.headers.Authorization = await this.options.getAuthorization();
-		}
-
-		const result = await fetch(`${gateway}/push/${service}/send`, { ...data, method: 'POST' });
+		const result = await fetch(`${gateway}/push/${service}/send`, options);
 		const response = await result.text();
 
 		if (result.status === 406) {

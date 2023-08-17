@@ -1,4 +1,4 @@
-import { Box, Margins, Tag, Button, Icon, ButtonGroup } from '@rocket.chat/fuselage';
+import { Box, Margins, Tag, Button, ButtonGroup } from '@rocket.chat/fuselage';
 import { useMutableCallback } from '@rocket.chat/fuselage-hooks';
 import { useToastMessageDispatch, useRoute, useUserSubscription, useTranslation } from '@rocket.chat/ui-contexts';
 import { Meteor } from 'meteor/meteor';
@@ -6,7 +6,7 @@ import moment from 'moment';
 import React, { useEffect, useState } from 'react';
 
 import { hasPermission } from '../../../../../../app/authorization/client';
-import VerticalBar from '../../../../../components/VerticalBar';
+import { ContextualbarScrollableContent, ContextualbarFooter } from '../../../../../components/Contextualbar';
 import { useEndpointData } from '../../../../../hooks/useEndpointData';
 import { useFormatDateAndTime } from '../../../../../hooks/useFormatDateAndTime';
 import { useFormatDuration } from '../../../../../hooks/useFormatDuration';
@@ -91,7 +91,7 @@ function ChatInfoDirectory({ id, route = undefined, room }) {
 
 	return (
 		<>
-			<VerticalBar.ScrollableContent p='x24'>
+			<ContextualbarScrollableContent p={24}>
 				<Margins block='x4'>
 					{room && v && <ContactField contact={v} room={room} />}
 					{visitorId && <VisitorClientInfo uid={visitorId} />}
@@ -102,7 +102,7 @@ function ChatInfoDirectory({ id, route = undefined, room }) {
 							<Label>{t('Tags')}</Label>
 							<Info>
 								{tags.map((tag) => (
-									<Box key={tag} mie='x4' display='inline'>
+									<Box key={tag} mie={4} display='inline'>
 										<Tag style={{ display: 'inline' }} disabled>
 											{tag}
 										</Tag>
@@ -171,14 +171,14 @@ function ChatInfoDirectory({ id, route = undefined, room }) {
 					{slaId && <SlaField id={slaId} />}
 					{priorityId && <PriorityField id={priorityId} />}
 				</Margins>
-			</VerticalBar.ScrollableContent>
-			<VerticalBar.Footer>
+			</ContextualbarScrollableContent>
+			<ContextualbarFooter>
 				<ButtonGroup stretch>
-					<Button onClick={onEditClick}>
-						<Icon name='pencil' size='x20' /> {t('Edit')}
+					<Button icon='pencil' onClick={onEditClick}>
+						{t('Edit')}
 					</Button>
 				</ButtonGroup>
-			</VerticalBar.Footer>
+			</ContextualbarFooter>
 		</>
 	);
 }

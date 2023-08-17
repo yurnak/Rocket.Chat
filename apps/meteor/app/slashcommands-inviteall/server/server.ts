@@ -8,13 +8,13 @@ import type { ISubscription, SlashCommand, SlashCommandCallbackParams } from '@r
 import { Rooms, Subscriptions, Users } from '@rocket.chat/models';
 import { Meteor } from 'meteor/meteor';
 
-import { settings } from '../../settings/server';
+import { isTruthy } from '../../../lib/isTruthy';
 import { i18n } from '../../../server/lib/i18n';
-import { slashCommands } from '../../utils/lib/slashCommand';
+import { addUsersToRoomMethod } from '../../lib/server/methods/addUsersToRoom';
 import { createChannelMethod } from '../../lib/server/methods/createChannel';
 import { createPrivateGroupMethod } from '../../lib/server/methods/createPrivateGroup';
-import { isTruthy } from '../../../lib/isTruthy';
-import { addUsersToRoomMethod } from '../../lib/server/methods/addUsersToRoom';
+import { settings } from '../../settings/server';
+import { slashCommands } from '../../utils/lib/slashCommand';
 
 function inviteAll<T extends string>(type: T): SlashCommand<T>['callback'] {
 	return async function inviteAll({ command, params, message, userId }: SlashCommandCallbackParams<T>): Promise<void> {
@@ -57,11 +57,11 @@ function inviteAll<T extends string>(type: T): SlashCommand<T>['callback'] {
 		});
 
 		try {
-			const APIsettings = settings.get('API_User_Limit');
+			const APIsettings = settings.get<number>('API_User_Limit');
 			if (!APIsettings) {
 				return;
 			}
-			if (cursor.count() > APIsettings) {
+			if ((await cursor.count()) > APIsettings) {
 				throw new Meteor.Error('error-user-limit-exceeded', 'User Limit Exceeded', {
 					method: 'addAllToRoom',
 				});
@@ -86,7 +86,6 @@ function inviteAll<T extends string>(type: T): SlashCommand<T>['callback'] {
 			void api.broadcast('notify.ephemeralMessage', userId, message.rid, {
 				msg: i18n.t('Users_added', { lng }),
 			});
-			return;
 		} catch (e: any) {
 			const msg = e.error === 'cant-invite-for-direct-room' ? 'Cannot_invite_users_to_direct_rooms' : e.error;
 			void api.broadcast('notify.ephemeralMessage', userId, message.rid, {

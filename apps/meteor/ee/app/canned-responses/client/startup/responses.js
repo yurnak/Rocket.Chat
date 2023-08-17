@@ -3,12 +3,11 @@ import { Tracker } from 'meteor/tracker';
 
 import { hasPermission } from '../../../../../app/authorization/client';
 import { settings } from '../../../../../app/settings/client';
-import { CannedResponse } from '../collections/CannedResponse';
 import { sdk } from '../../../../../app/utils/client/lib/SDKClient';
+import { CannedResponse } from '../collections/CannedResponse';
 
 const events = {
-	changed: (response) => {
-		delete response.type;
+	changed: ({ type, ...response }) => {
 		CannedResponse.upsert({ _id: response._id }, response);
 	},
 	removed: (response) => CannedResponse.remove({ _id: response._id }),
