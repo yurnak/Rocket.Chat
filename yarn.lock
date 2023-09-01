@@ -8155,17 +8155,10 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@rocket.chat/fuselage-tokens@npm:next":
+"@rocket.chat/fuselage-tokens@npm:next, @rocket.chat/fuselage-tokens@npm:~0.32.0-dev.379":
   version: 0.32.0-dev.379
   resolution: "@rocket.chat/fuselage-tokens@npm:0.32.0-dev.379"
   checksum: c5cf40295c4ae1a5918651b9e156629d6400d5823b8cf5f81a14c66da986a9302d79392b45e991c2fc37aad9633f3d8e2f7f29c68969592340b05968265244e6
-  languageName: node
-  linkType: hard
-
-"@rocket.chat/fuselage-tokens@npm:~0.32.0-dev.383":
-  version: 0.32.0-dev.383
-  resolution: "@rocket.chat/fuselage-tokens@npm:0.32.0-dev.383"
-  checksum: bd3504fa6a7ce4ed6fc91246c4c8a4e3e3da8bc5e2c5590e7f913bc1fd6f08896aa4a6c4b1d01dccf78267ade9ad5a831c788cb17a4eb744deefb45032a34894
   languageName: node
   linkType: hard
 
@@ -8225,14 +8218,14 @@ __metadata:
   linkType: soft
 
 "@rocket.chat/fuselage@npm:next":
-  version: 0.32.0-dev.433
-  resolution: "@rocket.chat/fuselage@npm:0.32.0-dev.433"
+  version: 0.32.0-dev.429
+  resolution: "@rocket.chat/fuselage@npm:0.32.0-dev.429"
   dependencies:
-    "@rocket.chat/css-in-js": ~0.31.26-dev.23
-    "@rocket.chat/css-supports": ~0.31.26-dev.23
-    "@rocket.chat/fuselage-tokens": ~0.32.0-dev.383
-    "@rocket.chat/memo": ~0.31.26-dev.23
-    "@rocket.chat/styled": ~0.31.26-dev.23
+    "@rocket.chat/css-in-js": ~0.31.26-dev.19
+    "@rocket.chat/css-supports": ~0.31.26-dev.19
+    "@rocket.chat/fuselage-tokens": ~0.32.0-dev.379
+    "@rocket.chat/memo": ~0.31.26-dev.19
+    "@rocket.chat/styled": ~0.31.26-dev.19
     invariant: ^2.2.4
     react-aria: ~3.23.1
     react-keyed-flatten-children: ^1.3.0
@@ -8244,7 +8237,7 @@ __metadata:
     react: ^17.0.2
     react-dom: ^17.0.2
     react-virtuoso: 1.2.4
-  checksum: 2696da3e5cdf9d21c9c96ba069a3ef44b946ce832796ed10047666da780ee3ae88d679f3c3222fe6c6d88b1bdc0b7dab97c83d0acfbb67ca330a14b6e4739aa9
+  checksum: 13ea95dea15c3677f82ffeb50780bc3479512cba6e226080bf464cf876794ed267db3419c45f63ddeaaff6a3401426ca4722e23e0f3586ca4f8eb2e6e25a7a70
   languageName: node
   linkType: hard
 
@@ -9354,7 +9347,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@rocket.chat/styled@npm:~0.31.26-dev.19, @rocket.chat/styled@npm:~0.31.26-dev.23":
+"@rocket.chat/styled@npm:~0.31.26-dev.19":
   version: 0.31.26-dev.23
   resolution: "@rocket.chat/styled@npm:0.31.26-dev.23"
   dependencies:
