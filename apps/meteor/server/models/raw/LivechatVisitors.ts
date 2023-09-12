@@ -34,6 +34,7 @@ export class LivechatVisitorsRaw extends BaseRaw<ILivechatVisitor> implements IL
 			{ key: { 'livechatData.$**': 1 } },
 			{ key: { activity: 1 } },
 			{ key: { disabled: 1 }, partialFilterExpression: { disabled: { $exists: true } } },
+			{ key: { activity: 1 }, partialFilterExpression: { activity: { $exists: true } } },
 		];
 	}
 
