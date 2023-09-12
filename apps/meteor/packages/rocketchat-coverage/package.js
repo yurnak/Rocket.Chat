@@ -15,4 +15,5 @@ Npm.depends({
 	'istanbul-lib-report': '3.0.0',
 	'istanbul-reports': '3.0.2',
 	'istanbul-lib-coverage': '3.0.0',
+	'istanbul-lib-source-maps': '4.0.0',
 });

@@ -6,6 +6,8 @@ import libReport from 'istanbul-lib-report';
 import reports from 'istanbul-reports';
 import libCoverage from 'istanbul-lib-coverage';
 
+import iLibSourceMaps from 'istanbul-lib-source-maps';
+
 const dir = process.env.COVERAGE_DIR;
 const reporter = process.env.COVERAGE_REPORTER || 'lcov';
 
@@ -33,6 +35,10 @@ process.on('exit', async () => {
 
 		const coverageMap = libCoverage.createCoverageMap(globalThis['__coverage__']);
 
+		const mapStore = iLibSourceMaps.createSourceMapStore();
+
+		const transformed = mapStore.transformCoverage(coverageMap);
+
 		const configWatermarks = {
 			statements: [50, 80],
 			functions: [50, 80],
@@ -42,7 +48,7 @@ process.on('exit', async () => {
 
 		const context = libReport.createContext({
 			dir,
-			coverageMap,
+			transformed,
 		});
 
 		const report = reports.create(reporter);
