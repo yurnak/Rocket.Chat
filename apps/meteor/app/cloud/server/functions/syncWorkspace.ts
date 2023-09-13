@@ -6,10 +6,22 @@ import { SystemLogger } from '../../../../server/lib/logger/system';
 import { getAndCreateNpsSurvey } from '../../../../server/services/nps/getAndCreateNpsSurvey';
 import { settings } from '../../../settings/server';
 import { buildWorkspaceRegistrationData } from './buildRegistrationData';
-import { getWorkspaceAccessToken } from './getWorkspaceAccessToken';
+import { generateWorkspaceBearerHttpHeader } from './getWorkspaceAccessToken';
 import { getWorkspaceLicense } from './getWorkspaceLicense';
 import { retrieveRegistrationStatus } from './retrieveRegistrationStatus';
 import { cacheNewSupportedVersionsToken } from './supportedVersionsToken';
+
+/**
+ * Rocket.Chat Cloud Sync Procedure
+ * It does not matter if you are registered with Rocket.Chat Cloud:
+ *	- Sends Statistics to Rocket.Chat Cloud
+ * If you are registered with Rocket.Chat Cloud
+ *	- Communicates with Rocket.Chat Cloud to update valuable information
+ *		- Receives NPS Survey from Rocket.Chat Cloud if applicable
+ *		- Receives Banners from Rocket.Chat Cloud if applicable
+ *		- Receives License from Rocket.Chat Cloud if applicable
+ *	- Receives a new List of Supported Versions from Rocket.Chat Cloud
+ */
 
 export async function syncWorkspace(reconnectCheck = false) {
 	const { workspaceRegistered, connectToCloud } = await retrieveRegistrationStatus();
@@ -21,19 +33,18 @@ export async function syncWorkspace(reconnectCheck = false) {
 
 	const workspaceUrl = settings.get('Cloud_Workspace_Registration_Client_Uri');
 
+	const token = await generateWorkspaceBearerHttpHeader(true);
+
 	let result;
 	try {
-		const headers: Record<string, string> = {};
-		const token = await getWorkspaceAccessToken(true);
-
-		if (token) {
-			headers.Authorization = `Bearer ${token}`;
-		} else {
+		if (!token) {
 			return false;
 		}
 
 		const request = await fetch(`${workspaceUrl}/client`, {
-			headers,
+			headers: {
+				...token,
+			},
 			body: info,
 			method: 'POST',
 		});
@@ -43,6 +54,55 @@ export async function syncWorkspace(reconnectCheck = false) {
 		}
 
 		result = await request.json();
+
+		const data = result;
+		if (!data) {
+			return true;
+		}
+
+		if (data.publicKey) {
+			await Settings.updateValueById('Cloud_Workspace_PublicKey', data.publicKey);
+		}
+
+		if (data.trial?.trialId) {
+			await Settings.updateValueById('Cloud_Workspace_Had_Trial', true);
+		}
+
+		if (data.nps) {
+			const { id: npsId, expireAt } = data.nps;
+
+			const startAt = new Date(data.nps.startAt);
+
+			await NPS.create({
+				npsId,
+				startAt,
+				expireAt: new Date(expireAt),
+				createdBy: {
+					_id: 'rocket.cat',
+					username: 'rocket.cat',
+				},
+			});
+
+			const now = new Date();
+
+			if (startAt.getFullYear() === now.getFullYear() && startAt.getMonth() === now.getMonth() && startAt.getDate() === now.getDate()) {
+				await getAndCreateNpsSurvey(npsId);
+			}
+		}
+
+		// add banners
+		if (data.banners) {
+			for await (const banner of data.banners) {
+				const { createdAt, expireAt, startAt } = banner;
+
+				await Banner.create({
+					...banner,
+					createdAt: new Date(createdAt),
+					expireAt: new Date(expireAt),
+					startAt: new Date(startAt),
+				});
+			}
+		}
 	} catch (err: any) {
 		SystemLogger.error({
 			msg: 'Failed to sync with Rocket.Chat Cloud',
@@ -52,58 +112,10 @@ export async function syncWorkspace(reconnectCheck = false) {
 
 		return false;
 	} finally {
-		// aways fetch the license
+		// always fetch the license
 		await getWorkspaceLicense();
 	}
 
-	const data = result;
-	if (!data) {
-		return true;
-	}
-
-	if (data.publicKey) {
-		await Settings.updateValueById('Cloud_Workspace_PublicKey', data.publicKey);
-	}
-
-	if (data.trial?.trialId) {
-		await Settings.updateValueById('Cloud_Workspace_Had_Trial', true);
-	}
-
-	if (data.nps) {
-		const { id: npsId, expireAt } = data.nps;
-
-		const startAt = new Date(data.nps.startAt);
-
-		await NPS.create({
-			npsId,
-			startAt,
-			expireAt: new Date(expireAt),
-			createdBy: {
-				_id: 'rocket.cat',
-				username: 'rocket.cat',
-			},
-		});
-
-		const now = new Date();
-
-		if (startAt.getFullYear() === now.getFullYear() && startAt.getMonth() === now.getMonth() && startAt.getDate() === now.getDate()) {
-			await getAndCreateNpsSurvey(npsId);
-		}
-	}
-
-	// add banners
-	if (data.banners) {
-		for await (const banner of data.banners) {
-			const { createdAt, expireAt, startAt } = banner;
-
-			await Banner.create({
-				...banner,
-				createdAt: new Date(createdAt),
-				expireAt: new Date(expireAt),
-				startAt: new Date(startAt),
-			});
-		}
-	}
 	await cacheNewSupportedVersionsToken();
 
 	return true;
