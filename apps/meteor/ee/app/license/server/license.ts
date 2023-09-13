@@ -3,6 +3,7 @@ import { EventEmitter } from 'events';
 import type { IAppStorageItem } from '@rocket.chat/apps-engine/server/storage';
 import { Apps } from '@rocket.chat/core-services';
 import { Users } from '@rocket.chat/models';
+import type { CloudVersionsResponse } from '@rocket.chat/server-cloud-communication/src';
 
 import { getInstallationSourceFromAppStorageItem } from '../../../../lib/apps/getInstallationSourceFromAppStorageItem';
 import type { ILicense } from '../definition/ILicense';
@@ -449,7 +450,7 @@ export function flatModules(modulesAndBundles: string[]): string[] {
 	return modules.concat(modulesFromBundles);
 }
 
-export async function supportedVersions() {
+export async function supportedVersions(): Promise<CloudVersionsResponse | undefined> {
 	return process.env.MOCK_CLOUD_SUPPORTED_VERSIONS_TOKEN ? JSON.parse(process.env.MOCK_CLOUD_SUPPORTED_VERSIONS_TOKEN) : undefined;
 }
 
