@@ -9,64 +9,7 @@ import { buildWorkspaceRegistrationData } from './buildRegistrationData';
 import { generateWorkspaceBearerHttpHeader } from './getWorkspaceAccessToken';
 import { getWorkspaceLicense } from './getWorkspaceLicense';
 import { retrieveRegistrationStatus } from './retrieveRegistrationStatus';
-import { getCachedSupportedVersionsToken } from './supportedVersionsToken';
-
-/**
- * Rocket.Chat Cloud Sync Procedure
- * It does not matter if you are registered with Rocket.Chat Cloud:
- *	- Sends Statistics to Rocket.Chat Cloud
- * If you are registered with Rocket.Chat Cloud
- *	- Communicates with Rocket.Chat Cloud to update valuable information
- *		- Receives NPS Survey from Rocket.Chat Cloud if applicable
- *		- Receives Banners from Rocket.Chat Cloud if applicable
- *		- Receives License from Rocket.Chat Cloud if applicable
- *	- Receives a new List of Supported Versions from Rocket.Chat Cloud
- */
-
-export async function syncWorkspace(reconnectCheck = false) {
-	const { workspaceRegistered, connectToCloud } = await retrieveRegistrationStatus();
-	if (!workspaceRegistered || (!connectToCloud && !reconnectCheck)) {
-		return false;
-	}
-
-	const info = await buildWorkspaceRegistrationData(undefined);
-
-	const workspaceUrl = settings.get('Cloud_Workspace_Registration_Client_Uri');
-
-	const token = await generateWorkspaceBearerHttpHeader(true);
-
-	let result;
-	try {
-		if (!token) {
-			return false;
-		}
-
-		const request = await fetch(`${workspaceUrl}/client`, {
-			headers: {
-				...token,
-			},
-			body: info,
-			method: 'POST',
-		});
-
-		if (!request.ok) {
-			throw new Error((await request.json()).error);
-		}
-
-		result = await request.json();
-
-		const data = result;
-		if (!data) {
-			return true;
-		}
-
-		if (data.publicKey) {
-			await Settings.updateValueById('Cloud_Workspace_PublicKey', data.publicKey);
-		}
-
-		if (data.trial?.trialId) {
-			await Settings.updateValueById('Cloud_Workspace_Had_Trial', true);
-		}
+import { getCachedSupportedVersionsToken, wrapPromise } from './supportedVersionsToken/supportedVersionsToken';
 
 		if (data.nps) {
 			const { id: npsId, expireAt } = data.nps;
