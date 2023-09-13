@@ -449,6 +449,10 @@ export function flatModules(modulesAndBundles: string[]): string[] {
 	return modules.concat(modulesFromBundles);
 }
 
+export async function supportedVersions() {
+	return process.env.MOCK_CLOUD_SUPPORTED_VERSIONS_TOKEN ? JSON.parse(process.env.MOCK_CLOUD_SUPPORTED_VERSIONS_TOKEN) : undefined;
+}
+
 interface IOverrideClassProperties {
 	[key: string]: (...args: any[]) => any;
 }
