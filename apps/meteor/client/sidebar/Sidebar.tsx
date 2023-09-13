@@ -7,6 +7,7 @@ import React, { memo } from 'react';
 import SidebarRoomList from './RoomList';
 import SidebarFooter from './footer';
 import SidebarHeader from './header';
+import { OverMacLimitSection } from './sections/OverMacLimitSection';
 import StatusDisabledSection from './sections/StatusDisabledSection';
 
 const Sidebar = () => {
@@ -15,6 +16,7 @@ const Sidebar = () => {
 	const { sidebar } = useLayout();
 	const [bannerDismissed, setBannerDismissed] = useSessionStorage('presence_cap_notifier', false);
 	const presenceDisabled = useSetting<boolean>('Presence_broadcast_disabled');
+	const isOverMacLimit = true; // TODO: Implement MAC limit logic
 
 	const sideBarBackground = css`
 		background-color: ${Palette.surface['surface-tint']};
@@ -38,6 +40,7 @@ const Sidebar = () => {
 			>
 				<SidebarHeader />
 				{presenceDisabled && !bannerDismissed && <StatusDisabledSection onDismiss={() => setBannerDismissed(true)} />}
+				{isOverMacLimit && <OverMacLimitSection />}
 				<SidebarRoomList />
 				<SidebarFooter />
 			</Box>
