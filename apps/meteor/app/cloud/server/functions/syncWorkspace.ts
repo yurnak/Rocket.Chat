@@ -11,9 +11,9 @@ import { getWorkspaceLicense } from './getWorkspaceLicense';
 import { retrieveRegistrationStatus } from './retrieveRegistrationStatus';
 import { getCachedSupportedVersionsToken } from './supportedVersionsToken/supportedVersionsToken';
 
-export async function syncWorkspace(reconnectCheck = false) {
+export async function syncWorkspace() {
 	const { workspaceRegistered, connectToCloud } = await retrieveRegistrationStatus();
-	if (!workspaceRegistered || (!connectToCloud && !reconnectCheck)) {
+	if (!workspaceRegistered || !connectToCloud) {
 		return false;
 	}
 

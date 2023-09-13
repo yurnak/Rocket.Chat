@@ -10,7 +10,7 @@ import { syncWorkspace } from './syncWorkspace';
 export async function startRegisterWorkspace(resend = false) {
 	const { workspaceRegistered, connectToCloud } = await retrieveRegistrationStatus();
 	if ((workspaceRegistered && connectToCloud) || process.env.TEST_MODE) {
-		await syncWorkspace(true);
+		await syncWorkspace();
 
 		return true;
 	}
