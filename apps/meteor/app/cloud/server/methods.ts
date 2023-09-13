@@ -19,7 +19,6 @@ declare module '@rocket.chat/ui-contexts' {
 	// eslint-disable-next-line @typescript-eslint/naming-convention
 	interface ServerMethods {
 		'cloud:checkRegisterStatus': () => {
-			connectToCloud: boolean;
 			workspaceRegistered: boolean;
 			workspaceId: string;
 			uniqueId: string;

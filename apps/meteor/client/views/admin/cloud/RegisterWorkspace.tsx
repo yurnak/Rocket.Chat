@@ -16,7 +16,6 @@ const RegisterWorkspace = () => {
 
 	const { data: registrationStatusData, isLoading, isError, refetch } = useRegistrationStatus();
 	const isWorkspaceRegistered = registrationStatusData?.registrationStatus?.workspaceRegistered ?? false;
-	const isConnectedToCloud = registrationStatusData?.registrationStatus?.connectToCloud ?? false;
 
 	if (isLoading || isError) {
 		return null;
@@ -41,20 +40,20 @@ const RegisterWorkspace = () => {
 	};
 
 	const handleRegistrationTag = () => {
-		if (!isWorkspaceRegistered && !isConnectedToCloud) {
+		if (!isWorkspaceRegistered) {
 			return <Tag variant='secondary-danger'>{t('RegisterWorkspace_NotRegistered_Title')}</Tag>;
 		}
-		if (isWorkspaceRegistered && !isConnectedToCloud) {
+		if (isWorkspaceRegistered) {
 			return <Tag variant='secondary-danger'>{t('RegisterWorkspace_NotConnected_Title')}</Tag>;
 		}
 		return <Tag variant='primary'>{t('Workspace_registered')}</Tag>;
 	};
 
 	const handleCardsTitle = () => {
-		if (!isWorkspaceRegistered && !isConnectedToCloud) {
+		if (!isWorkspaceRegistered) {
 			return t('RegisterWorkspace_NotRegistered_Subtitle');
 		}
-		if (isWorkspaceRegistered && !isConnectedToCloud) {
+		if (isWorkspaceRegistered) {
 			return t('RegisterWorkspace_NotConnected_Subtitle');
 		}
 		return t('RegisterWorkspace_Registered_Description');
@@ -65,7 +64,6 @@ const RegisterWorkspace = () => {
 			<Page.Header title={t('Registration')}>
 				<RegisterWorkspaceMenu
 					isWorkspaceRegistered={isWorkspaceRegistered}
-					isConnectedToCloud={isConnectedToCloud}
 					onClick={handleRegisterWorkspaceClick}
 					onStatusChange={refetch}
 					onClickOfflineRegistration={handleManualWorkspaceRegistrationButton}
