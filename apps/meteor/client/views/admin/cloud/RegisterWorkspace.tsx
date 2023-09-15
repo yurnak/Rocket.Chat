@@ -39,26 +39,6 @@ const RegisterWorkspace = () => {
 		setModal(<ManualWorkspaceRegistrationModal onClose={handleModalClose} />);
 	};
 
-	const handleRegistrationTag = () => {
-		if (!isWorkspaceRegistered) {
-			return <Tag variant='secondary-danger'>{t('RegisterWorkspace_NotRegistered_Title')}</Tag>;
-		}
-		if (isWorkspaceRegistered) {
-			return <Tag variant='secondary-danger'>{t('RegisterWorkspace_NotConnected_Title')}</Tag>;
-		}
-		return <Tag variant='primary'>{t('Workspace_registered')}</Tag>;
-	};
-
-	const handleCardsTitle = () => {
-		if (!isWorkspaceRegistered) {
-			return t('RegisterWorkspace_NotRegistered_Subtitle');
-		}
-		if (isWorkspaceRegistered) {
-			return t('RegisterWorkspace_NotConnected_Subtitle');
-		}
-		return t('RegisterWorkspace_Registered_Description');
-	};
-
 	return (
 		<Page background='tint'>
 			<Page.Header title={t('Registration')}>
@@ -71,11 +51,15 @@ const RegisterWorkspace = () => {
 			</Page.Header>
 
 			<Page.ScrollableContentWithShadow>
-				<Box display='flex'>{handleRegistrationTag()}</Box>
+				<Box display='flex'>
+					{!isWorkspaceRegistered && <Tag variant='secondary-danger'>{t('RegisterWorkspace_NotRegistered_Title')}</Tag>}
+					{isWorkspaceRegistered && <Tag variant='primary'>{t('Workspace_registered')}</Tag>}
+				</Box>
 
 				<Box pb={8}>
-					<Box fontSize='h3' fontWeight={700}>
-						{handleCardsTitle()}
+					<Box fontScale='h3'>
+						{!isWorkspaceRegistered && t('RegisterWorkspace_NotRegistered_Subtitle')}
+						{isWorkspaceRegistered && t('RegisterWorkspace_Registered_Description')}
 					</Box>
 					<RegisterWorkspaceCards />
 				</Box>
